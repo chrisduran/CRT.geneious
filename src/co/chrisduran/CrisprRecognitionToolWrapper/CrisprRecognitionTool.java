@@ -8,7 +8,6 @@ import com.biomatters.geneious.publicapi.documents.sequence.SequenceAnnotationIn
 import com.biomatters.geneious.publicapi.utilities.SequenceUtilities;
 
 import com.room220.crt.CRISPRFinder;
-import com.room220.crt.CRISPRFinderWrapper;
 import jebl.util.ProgressListener;
 
 import java.util.*;
