@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
 
-    public static String TYPE_CRISPR = "CRISPR";
+    public static String TYPE_CRISPR = "CRISPR Site";
     public static String TYPE_CRISPR_REPEAT_UNIT = "CRISPR Repeat Unit";
     public static String TYPE_CRISPR_SPACER = "CRISPR Spacer";
 
