@@ -30,6 +30,7 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
     public static String TYPE_CRISPR_SPACER = "CRISPR Spacer";
 
     private static Pattern totalRangePattern = Pattern.compile("Range: (\\d+) - (\\d+)");
+    private static Pattern intervalPattern = Pattern.compile("^(\\d+)\\t*([GATC]+)\\t*([GATC]+)");
 
     public GeneiousActionOptions getActionOptions() {
         return new GeneiousActionOptions("Find CRISPR loci...",
@@ -86,21 +87,31 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
 
     private void parseOutputIntoAnnotations(File outputFile, List<SequenceAnnotation> results) {
         BufferedReader reader;
-        boolean inCrispr = false;
         String currentCrispr = "";
         try {
             reader = new BufferedReader(new FileReader(outputFile));
             String line;
+            Matcher interval;
+            int innerCount = 1;
             while ((line=reader.readLine())!=null) {
-
                 if (line.startsWith("CRISPR")) {
-                    inCrispr = true;
                     String[] names = line.split(" ",3);
                     currentCrispr = names[0]+" "+names[1];
                     results.add(getOverallCrisprAnnotation(currentCrispr, line));
+                    innerCount = 1;
+                } else if ((interval = intervalPattern.matcher(line)).find()) {
+                    int start = Integer.parseInt(interval.group(1));
+                    SequenceAnnotationInterval repeatInterval = new SequenceAnnotationInterval(start,interval.group(2).length()+start);
+                    results.add(new SequenceAnnotation(currentCrispr+"; Repeat "+innerCount,TYPE_CRISPR_REPEAT_UNIT,repeatInterval));
+                    if (interval.group(3).length()>1) {
+                        SequenceAnnotationInterval spacerInterval =
+                                new SequenceAnnotationInterval(interval.group(2).length()+start,interval.group(3).length()+interval.group(2).length()+start);
+                        results.add(new SequenceAnnotation(currentCrispr+"; Spacer "+innerCount,TYPE_CRISPR_SPACER,spacerInterval));
+                    }
+                    innerCount++;
                 }
-                if (line.equals("")) inCrispr = false;
-                if (inCrispr) System.out.println(line);
+
+                //if (inCrispr) System.out.println(line);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -113,7 +124,7 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
         Matcher matcher = totalRangePattern.matcher(sourceStr);
 
         if (matcher.find()) {
-            System.out.println(matcher.group(1)+" <><><><><> "+matcher.group(2)); //DEBUG
+            //System.out.println(matcher.group(1)+" <><><><><> "+matcher.group(2)); //DEBUG
             SequenceAnnotationInterval interval = new SequenceAnnotationInterval(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)));
             return new SequenceAnnotation(name,TYPE_CRISPR,interval);
         }
@@ -133,11 +144,16 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
         private final IntegerOption searchWL;
         private CrisprRecognitionToolOptions() {
             minNR= addIntegerOption("minNR","Minimum number of repeats a CRISPR must contain",3);
-            minRL = addIntegerOption("minRL","Minimum length of a CRISPR's repeated region",19);
+            minRL = addIntegerOption("minRL", "Minimum length of a CRISPR's repeated region", 19);
+            minRL.setAdvanced(true);
             maxRL = addIntegerOption("maxRL","Maximum length of a CRISPR's repeated region",38);
+            maxRL.setAdvanced(true);
             minSL = addIntegerOption("minSL","Minimum length of a CRISPR's non-repeated region (or spacer region)",19);
+            minSL.setAdvanced(true);
             maxSL = addIntegerOption("maxSL","Maximum length of a CRISPR's non-repeated region (or spacer region)",48);
+            maxSL.setAdvanced(true);
             searchWL = addIntegerOption("searchWL","Length of search window used to discover CRISPRs",8,6,9);
+            searchWL.setAdvanced(true);
 
         }
 
