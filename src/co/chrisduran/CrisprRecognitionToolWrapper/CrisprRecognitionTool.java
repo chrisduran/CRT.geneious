@@ -17,9 +17,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This plugin shows how to create a simple SequenceAnnotationGenerator by providing a simple implementation of a Motif finder.
+ * A Geneious plugin wrapper for the CRT application by Bland et al (http://www.room220.com/crt/).
  * 
- * @author Matt Kearse
+ * @author Chris Duran
  * @version $Id$
  */
 
