@@ -5,11 +5,13 @@ import com.biomatters.geneious.publicapi.documents.AnnotatedPluginDocument;
 import com.biomatters.geneious.publicapi.documents.sequence.SequenceAnnotation;
 import com.biomatters.geneious.publicapi.documents.sequence.NucleotideSequenceDocument;
 import com.biomatters.geneious.publicapi.documents.sequence.SequenceAnnotationInterval;
+import com.biomatters.geneious.publicapi.utilities.FileUtilities;
 import com.biomatters.geneious.publicapi.utilities.SequenceUtilities;
 
 import com.room220.crt.CRISPRFinder;
 import jebl.util.ProgressListener;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -54,16 +56,48 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
 
         List<SequenceAnnotation> results = new ArrayList<SequenceAnnotation>();
 
-        CRISPRFinder crisprFinder = new CRISPRFinder("input.fasta","crf.out",0,
+        File outputFile;
+        String outputFilePath;
+        try {
+            outputFile = FileUtilities.createTempFile("crf.out", true);
+            outputFilePath = outputFile.getCanonicalPath();
+        } catch (IOException e) {
+            throw new DocumentOperationException("Cannot create temporary working directory");
+        }
+
+        CRISPRFinder crisprFinder = new CRISPRFinder("input.fasta",outputFilePath,0,
                 options.getMinNR(),options.getMinRL(),options.getMaxRL(),options.getMinSL(),options.getMaxSL(),options.getSearchWL());
 
         crisprFinder.insertSequenceAndFindRepeats(sequence.getName(), sequenceString);
 
-
-
+        parseOutputIntoAnnotations(outputFile);
 
         return Arrays.asList(results); // Put the results in a single element array since we only operate on a single sequence hence there is only 1 set of results.
     }
+
+    private void parseOutputIntoAnnotations(File outputFile) {
+        BufferedReader reader;
+        boolean inCrispr = false;
+        try {
+            reader = new BufferedReader(new FileReader(outputFile));
+            String line;
+            while ((line=reader.readLine())!=null) {
+
+                if (line.startsWith("CRISPR")) {
+                    inCrispr = true;
+
+                }
+                if (line.equals("")) inCrispr = false;
+                if (inCrispr) System.out.println(line);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     private static class CrisprRecognitionToolOptions extends Options {
 
