@@ -4,16 +4,8 @@ import com.biomatters.geneious.publicapi.plugin.GeneiousPlugin;
 import com.biomatters.geneious.publicapi.plugin.SequenceAnnotationGenerator;
 
 /**
- * This plugin shows how to create a simple annotation generator plugin. This allows
- * the user to create annotations that appear in the sequence viewer.
- * <p/>
- * A few lines of code cause a menu entry to appear in the tools drop-down menu in the sequence viewer.
- * Upon selecting it a dialog populated with various options appears. Finally all the
- * code in this plugin has to do, is given a sequence return a list of annotations to be
- * added to the sequence and the Geneious framework handles the rest (such as saving
- * to disk, providing undo functionality, laying out the options GUI, remembering user
- * selected option values between invocations).
- * <p/>
+ * A Geneious plugin wrapper for the CRT application by Bland et al (http://www.room220.com/crt/).
+ * 
  * This class just provides the framework to hook the {@link co.chrisduran.CrisprRecognitionToolWrapper.CrisprRecognitionTool}
  * into Geneious. All of the real work happens in {@link co.chrisduran.CrisprRecognitionToolWrapper.CrisprRecognitionTool}.
  */
