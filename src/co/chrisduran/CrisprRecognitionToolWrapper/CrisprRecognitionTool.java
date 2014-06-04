@@ -93,26 +93,39 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
             String line;
             Matcher interval;
             int innerCount = 1;
+            List<SequenceAnnotationInterval> sequenceAnnotationIntervals =  new LinkedList<SequenceAnnotationInterval>();
             while ((line=reader.readLine())!=null) {
                 if (line.startsWith("CRISPR")) {
                     String[] names = line.split(" ",3);
                     currentCrispr = names[0]+" "+names[1];
+                    if (!sequenceAnnotationIntervals.isEmpty()) {
+                        results.add(new SequenceAnnotation(currentCrispr+" Repeat Units",TYPE_CRISPR_REPEAT_UNIT,sequenceAnnotationIntervals.toArray(new SequenceAnnotationInterval[0])));
+                        sequenceAnnotationIntervals.clear();
+                    }
                     results.add(getOverallCrisprAnnotation(currentCrispr, line));
                     innerCount = 1;
                 } else if ((interval = intervalPattern.matcher(line)).find()) {
                     int start = Integer.parseInt(interval.group(1));
-                    SequenceAnnotationInterval repeatInterval = new SequenceAnnotationInterval(start,interval.group(2).length()+start);
-                    results.add(new SequenceAnnotation(currentCrispr+"; Repeat "+innerCount,TYPE_CRISPR_REPEAT_UNIT,repeatInterval));
-                    if (interval.group(3).length()>1) {
+
+                    if (interval.group(3).length()>1) { //dodgy regex will show one character in the third group when the CRISPR has a trailing repeat unit
+                        sequenceAnnotationIntervals.add(new SequenceAnnotationInterval(start,interval.group(2).length()+start-1));
                         SequenceAnnotationInterval spacerInterval =
-                                new SequenceAnnotationInterval(interval.group(2).length()+start,interval.group(3).length()+interval.group(2).length()+start);
+                                new SequenceAnnotationInterval(interval.group(2).length()+start,interval.group(3).length()+interval.group(2).length()+start-1);
                         results.add(new SequenceAnnotation(currentCrispr+"; Spacer "+innerCount,TYPE_CRISPR_SPACER,spacerInterval));
+                    } else {
+                        sequenceAnnotationIntervals.add(new SequenceAnnotationInterval(start,interval.group(2).length()+start));
                     }
                     innerCount++;
+
                 }
 
-                //if (inCrispr) System.out.println(line);
             }
+            if (!sequenceAnnotationIntervals.isEmpty()) { //clean up final annotations
+                results.add(new SequenceAnnotation(currentCrispr+" Repeat Units",TYPE_CRISPR_REPEAT_UNIT,sequenceAnnotationIntervals.toArray(new SequenceAnnotationInterval[0])));
+                sequenceAnnotationIntervals.clear();
+            }
+
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
