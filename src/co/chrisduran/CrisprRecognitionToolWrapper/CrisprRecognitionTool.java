@@ -13,6 +13,8 @@ import jebl.util.ProgressListener;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This plugin shows how to create a simple SequenceAnnotationGenerator by providing a simple implementation of a Motif finder.
@@ -22,6 +24,13 @@ import java.util.*;
  */
 
 public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
+
+    public static String TYPE_CRISPR = "CRISPR";
+    public static String TYPE_CRISPR_REPEAT_UNIT = "CRISPR Repeat Unit";
+    public static String TYPE_CRISPR_SPACER = "CRISPR Spacer";
+
+    private static Pattern totalRangePattern = Pattern.compile("Range: (\\d+) - (\\d+)");
+
     public GeneiousActionOptions getActionOptions() {
         return new GeneiousActionOptions("Find CRISPR loci...",
                 "Finds a non-ambiguous motif and creates annotations covering each occurrence").
@@ -70,14 +79,15 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
 
         crisprFinder.insertSequenceAndFindRepeats(sequence.getName(), sequenceString);
 
-        parseOutputIntoAnnotations(outputFile);
+        parseOutputIntoAnnotations(outputFile, results);
 
         return Arrays.asList(results); // Put the results in a single element array since we only operate on a single sequence hence there is only 1 set of results.
     }
 
-    private void parseOutputIntoAnnotations(File outputFile) {
+    private void parseOutputIntoAnnotations(File outputFile, List<SequenceAnnotation> results) {
         BufferedReader reader;
         boolean inCrispr = false;
+        String currentCrispr = "";
         try {
             reader = new BufferedReader(new FileReader(outputFile));
             String line;
@@ -85,7 +95,9 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
 
                 if (line.startsWith("CRISPR")) {
                     inCrispr = true;
-
+                    String[] names = line.split(" ",3);
+                    currentCrispr = names[0]+" "+names[1];
+                    results.add(getOverallCrisprAnnotation(currentCrispr, line));
                 }
                 if (line.equals("")) inCrispr = false;
                 if (inCrispr) System.out.println(line);
@@ -97,6 +109,16 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
         }
     }
 
+    private SequenceAnnotation getOverallCrisprAnnotation(String name, String sourceStr) {
+        Matcher matcher = totalRangePattern.matcher(sourceStr);
+
+        if (matcher.find()) {
+            System.out.println(matcher.group(1)+" <><><><><> "+matcher.group(2)); //DEBUG
+            SequenceAnnotationInterval interval = new SequenceAnnotationInterval(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)));
+            return new SequenceAnnotation(name,TYPE_CRISPR,interval);
+        }
+        return null;
+    }
 
 
     private static class CrisprRecognitionToolOptions extends Options {
