@@ -24,7 +24,6 @@ public class CRISPRFinder
 	{
 		inputFileName = _inputFileName;
 		outputFileName = _outputFileName;
-
 		screenDisplay = _screenDisplay;
 		minNumRepeats = _minNumRepeats;
       	minRepeatLength = _minRepeatLength;
@@ -34,6 +33,14 @@ public class CRISPRFinder
       	searchWindowLength = _searchWindowLength;
 	}
 
+    //Method added that bypasses the Standard CRISPRFinder FASTA Reader and uses the previously loaded Sequence from Geneious directly.
+    public void insertSequenceAndFindRepeats(String _label, String _sequence) {
+        sequence = new DNASequence(_sequence, _label);
+        sequenceLength = sequence.length();
+        System.out.println(sequence.getName());
+        System.out.println(sequence.length() + " bases");
+        findRepeats();
+    }
 
 	public void goCRISPRFinder()
 	{	File inputFile = new File(inputFileName);
@@ -69,7 +76,7 @@ public class CRISPRFinder
 	}
 
 
-	public void findRepeats()
+	private void findRepeats()
 	{
 		Vector CRISPRVector = new Vector();
 		sequenceLength = sequence.length();
@@ -142,7 +149,7 @@ public class CRISPRFinder
 							CRISPRVector.addElement(candidateCRISPR);
 							repeatsFound = true;
 
-							//we may skip current com.room220.crt.CRISPR (assuming CRISPRs are not interleaved)
+							//we may skip current CRISPR (assuming CRISPRs are not interleaved)
 							j = candidateCRISPR.end() + 1;
 						}
 

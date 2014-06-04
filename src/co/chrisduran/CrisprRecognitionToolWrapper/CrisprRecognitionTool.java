@@ -7,6 +7,7 @@ import com.biomatters.geneious.publicapi.documents.sequence.NucleotideSequenceDo
 import com.biomatters.geneious.publicapi.documents.sequence.SequenceAnnotationInterval;
 import com.biomatters.geneious.publicapi.utilities.SequenceUtilities;
 
+import com.room220.crt.CRISPRFinder;
 import com.room220.crt.CRISPRFinderWrapper;
 import jebl.util.ProgressListener;
 
@@ -49,51 +50,64 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
         CrisprRecognitionToolOptions options = (CrisprRecognitionToolOptions) _options;
         // We can safely cast this to CrisprRecognitionToolOptions because that is all we ever return from getOptions()
 
-        String sequenceString=sequence.getSequenceString().toUpperCase();
+        String sequenceString=sequence.getSequenceString();
+        //System.out.println(sequenceString);
 
         List<SequenceAnnotation> results = new ArrayList<SequenceAnnotation>();
-        String basesToFind=options.getBasesToFind();
-        if (basesToFind.length()==0) {
-            throw new DocumentOperationException("Must specify at least 1 base to find");
-        }
 
-        CRISPRFinderWrapper cfw = new CRISPRFinderWrapper(sequence.getName(),sequence.getSequenceString().toUpperCase(),0,3,19,28,19,48,8);
+        CRISPRFinder crisprFinder = new CRISPRFinder("input.fasta","crf.out",0,
+                options.getMinNR(),options.getMinRL(),options.getMaxRL(),options.getMinSL(),options.getMaxSL(),options.getSearchWL());
+
+        crisprFinder.insertSequenceAndFindRepeats(sequence.getName(), sequenceString);
+
+
+
 
         return Arrays.asList(results); // Put the results in a single element array since we only operate on a single sequence hence there is only 1 set of results.
     }
 
     private static class CrisprRecognitionToolOptions extends Options {
-        private final BooleanOption alsoFindReverse;
-        private final StringOption basesToFind;
-        private final StringOption annotationType;
-        private final StringOption annotationName;
+
+
+
+        private final IntegerOption minNR;
+        private final IntegerOption minRL;
+        private final IntegerOption maxRL;
+        private final IntegerOption minSL;
+        private final IntegerOption maxSL;
+        private final IntegerOption searchWL;
         private CrisprRecognitionToolOptions() {
-            basesToFind = addStringOption("basesToFind","Bases to find","");
-            alsoFindReverse = addBooleanOption("alsoFindReverse", "Also find on reverse complement", true);
+            minNR= addIntegerOption("minNR","Minimum number of repeats a CRISPR must contain",3);
+            minRL = addIntegerOption("minRL","Minimum length of a CRISPR's repeated region",19);
+            maxRL = addIntegerOption("maxRL","Maximum length of a CRISPR's repeated region",38);
+            minSL = addIntegerOption("minSL","Minimum length of a CRISPR's non-repeated region (or spacer region)",19);
+            maxSL = addIntegerOption("maxSL","Maximum length of a CRISPR's non-repeated region (or spacer region)",48);
+            searchWL = addIntegerOption("searchWL","Length of search window used to discover CRISPRs",8,6,9);
 
-            annotationType = addStringOption("annotationType","Annotation type", SequenceAnnotation.TYPE_MOTIF);
-            annotationType.setAdvanced(true);
-            annotationType.setDescription("The type of annotations that will be created on each matching occurrence");
-
-            annotationName = addStringOption("annotationName","Annotation name", "");
-            annotationName.setAdvanced(true);
-            annotationName.setDescription("The name of the annotations that will be created on each matching occurrence");
         }
 
-        public boolean isAlsoFindReverse() {
-            return alsoFindReverse.getValue();
+        public int getMinNR() {
+            return minNR.getValue();
         }
 
-        public String getBasesToFind() {
-            return basesToFind.getValue().toUpperCase();
+        public int getMinRL() {
+            return minRL.getValue();
         }
 
-        public String getAnnotationType() {
-            return annotationType.getValue();
+        public int getMaxRL() {
+            return maxRL.getValue();
         }
 
-        public String getAnnotationName() {
-            return annotationName.getValue();
+        public int getMinSL() {
+            return minSL.getValue();
+        }
+
+        public int getMaxSL() {
+            return maxSL.getValue();
+        }
+
+        public int getSearchWL() {
+            return searchWL.getValue();
         }
 
     }
