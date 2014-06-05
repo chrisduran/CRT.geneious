@@ -1,5 +1,5 @@
-CRISPER Recognition Tool Wrapper
-================================
+CRISPR Recognition Tool Wrapper
+===============================
 
 A Geneious plugin wrapper for Bland C, Ramsey TL, Sabree F, Lowe M, Brown K, Kyrpides NC, Hugenholtz P:
 CRISPR Recognition Tool (CRT): a tool for automatic detection of clustered regularly interspaced palindromic repeats.
