@@ -1,5 +1,6 @@
 package co.chrisduran.CrisprRecognitionToolWrapper;
 
+import com.biomatters.geneious.publicapi.components.GEditorPane;
 import com.biomatters.geneious.publicapi.plugin.*;
 import com.biomatters.geneious.publicapi.documents.AnnotatedPluginDocument;
 import com.biomatters.geneious.publicapi.documents.sequence.SequenceAnnotation;
@@ -10,9 +11,13 @@ import com.biomatters.geneious.publicapi.utilities.SequenceUtilities;
 
 import com.room220.crt.CRISPRFinder;
 import jebl.util.ProgressListener;
+import org.virion.jam.html.SimpleLinkListener;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -168,6 +173,22 @@ public class CrisprRecognitionTool extends SequenceAnnotationGenerator {
             searchWL = addIntegerOption("searchWL","Length of search window used to discover CRISPRs",8,6,9);
             searchWL.setAdvanced(true);
 
+        }
+
+        protected JPanel createPanel() {
+            JPanel mainPanel = new JPanel(new BorderLayout());
+            JPanel defaultPanel = super.createPanel();
+            mainPanel.add(defaultPanel, BorderLayout.CENTER);
+            GEditorPane citationPane = new GEditorPane();
+            citationPane.setEditable(false);
+            citationPane.setOpaque(false);
+            citationPane.setContentType("text/html");
+            citationPane.addHyperlinkListener(new SimpleLinkListener());
+            citationPane.setText("<html><br><i><center>Powered by CRISPR Recognition Tool (CRT); Version 1.2. by Bland et al.<br>"
+                             + "Visit <a href=\"http://www.room220.com/crt/\">www.room220.com/crt/</a> for details and citation instructions.<br>"
+                    + "CRT is Public Domain Software.</center></i></html>");
+            mainPanel.add(citationPane, BorderLayout.SOUTH);
+            return mainPanel;
         }
 
         public int getMinNR() {
