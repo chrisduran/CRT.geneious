@@ -26,3 +26,5 @@ build/CrisprRecognitionTool.jar
 CrisprRecognitionTool.iml
 
 CrisprRecognitionTool.iml
+
+*.gplugin
