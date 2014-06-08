@@ -44,7 +44,7 @@ public class CrisprRecognitionToolPlugin extends GeneiousPlugin {
     }
 
     public String getVersion() {
-        return "1.0";
+        return "1.1";
     }
 
     public String getMinimumApiVersion() {
