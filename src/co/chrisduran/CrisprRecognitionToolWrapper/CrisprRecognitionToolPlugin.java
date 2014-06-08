@@ -48,7 +48,7 @@ public class CrisprRecognitionToolPlugin extends GeneiousPlugin {
     }
 
     public String getMinimumApiVersion() {
-        return "4.1";
+        return "4.700";
     }
 
     public int getMaximumApiVersion() {
