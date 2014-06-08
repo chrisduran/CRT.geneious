@@ -10,8 +10,8 @@ http://www.room220.com/crt/
 
 ### Download
 
-The latest version of this plugin is 1.0. It can be downloaded from the following URL:
-https://docs.google.com/file/d/0B3kEllNv_IIhdjdRM1M0YjEwRlU/edit?pli=1
+The latest version of this plugin is 1.1. It can be downloaded from the following URL:
+https://docs.google.com/file/d/0B3kEllNv_IIhZUZGNmJJQkhUem8/edit?pli=1
 
 ### Licence
 
